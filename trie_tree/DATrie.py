@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-08-25 15:28:24
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-08-25 21:51:08
+# @Last Modified time: 2019-08-25 22:22:16
 import numpy as np
 
 ARRAY_SIZE = 655350
@@ -21,7 +21,7 @@ class TrieNode(object):
         self.label = 0  # 节点标志
         self.value = -1  # 当该节点为叶子节点时关联的字典表中对应词条的索引号
 
-
+        
 class DATrie(object):
     """docstring for DATrie"""
 

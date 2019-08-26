@@ -38,12 +38,12 @@ class Trie():
 
 if __name__ == '__main__':
     trie = Trie()
-    words = ["apple"]
+    words = ["apple","app"]
     for i in words:
         trie.insert(i)
 
     print trie.search("apple") # 返回true
-    print trie.search("app") # 返回false
+    print trie.search("apa") # 返回false
     print trie.start_with("app") # 返回true
     trie.insert("app")
     print trie.search("app") # 返回true
