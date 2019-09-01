@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-08-27 09:23:51
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-09-01 11:36:18
+# @Last Modified time: 2019-09-01 15:40:56
 import math
 import codecs
 
@@ -187,7 +187,7 @@ class SilinSimilarity(object):
                 break
         return res
 
-    def split_code(self,code):       
+    def split_code(self,code): 
         """
         @brief      将code进行编码划分
         @param      self   The object
