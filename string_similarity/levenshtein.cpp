@@ -2,7 +2,7 @@
 * @Author: huzhu
 * @Date:   2019-09-01 17:28:19
 * @Last Modified by:   huzhu
-* @Last Modified time: 2019-09-01 20:21:25
+* @Last Modified time: 2019-09-02 15:59:19
 */
 
 #include <iostream>
@@ -49,6 +49,6 @@ int main(){
     ic = dc = rc = 1;
     a = "abcdefg";
     b = "bcdef";
-    cout << get_distance(a, b);
+    cout << get_distance(a, b) << endl;
     return 0;
 }

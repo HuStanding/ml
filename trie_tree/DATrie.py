@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-08-25 15:28:24
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-08-25 22:22:16
+# @Last Modified time: 2019-09-03 09:45:25
 import numpy as np
 
 ARRAY_SIZE = 655350
@@ -66,6 +66,19 @@ class DATrie(object):
                 else:
                     break
         return res
+
+    def start_with(self, keyword):
+        chars = list(keyword)
+        start_state = 0
+        for j in range(len(keyword)):
+            end_state = self.transfor_ratio(
+                start_state, self.get_code(chars[j]))
+            if self.base[end_state].transfor_ratio != BASE_NULL and self.check[end_state] == start_state:
+                start_state = end_state
+                continue
+            else:
+                return False
+        return True
 
     def print_trie(self):
         print()
@@ -144,8 +157,11 @@ if __name__ == '__main__':
     dat = DATrie()
     dat.build(words)
     dat.print_trie()
-    print(dat.match("清华大学"))
+    print(dat.match("清"))
     print(dat.match("Python"))
     print(dat.match("中华人民共和国"))
     print(dat.match("贝壳找房"))
+    print(dat.start_with("贝壳"))
+    print(dat.start_with("Pytho"))
+    print(dat.start_with("中"))
 
