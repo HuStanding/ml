@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-09-09 22:04:31
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-09-10 14:23:36
+# @Last Modified time: 2019-09-11 14:46:32
 import nltk
 from itertools import chain
 from sklearn.metrics import classification_report
@@ -14,8 +14,8 @@ model_path = 'model/crf.model'
 train_sents = list(nltk.corpus.conll2002.iob_sents('esp.train'))
 test_sents = list(nltk.corpus.conll2002.iob_sents('esp.testb'))
 
-# print(train_sents[0:3])
-# print(test_sents[0:3])
+print(train_sents[0:1])
+print(test_sents[0:1])
 
 def word2features(sent, i):
     word = sent[i][0]
