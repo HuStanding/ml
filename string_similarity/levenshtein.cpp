@@ -2,7 +2,7 @@
 * @Author: huzhu
 * @Date:   2019-09-01 17:28:19
 * @Last Modified by:   huzhu
-* @Last Modified time: 2019-09-02 15:59:19
+* @Last Modified time: 2019-09-11 16:57:46
 */
 
 #include <iostream>
@@ -37,11 +37,12 @@ int get_distance(string a,string b){
             dp[i][j] = min(min(case1, case2), case3);
         }
     }
+    int res = dp[row][col];
     for(int i = 0; i < row + 1; i++){
         delete[] dp[i];
     } 
     delete[] dp;
-    return dp[row][col];
+    return res;
 }
 
 int main(){
