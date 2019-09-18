@@ -2,8 +2,9 @@
 # @Author: huzhu
 # @Date:   2019-09-16 13:36:05
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-09-16 21:56:35
+# @Last Modified time: 2019-09-18 21:22:43
 from math import log
+import codecs
 
 def cal_shannonEnt(dataSet):
 	"""
@@ -121,10 +122,35 @@ def create_tree(dataSet, labels):
 		my_tree[best_label][value] = create_tree(split_dataSet(dataSet, best_feature, value), sub_labels)
 	return my_tree
 
+def store_tree(input_tree, filename):
+	"""
+	@brief      Stores a tree.
+	@param      input_tree  The input tree
+	@param      filename    The filename
+	@return     { description_of_the_return_value }
+	"""
+	import pickle
+	fw = codecs.open(filename, "wb")
+	pickle.dump(input_tree, fw)
+
+def grab_tree(filename):
+	"""
+	@brief      { function_description }
+	@param      filename  The filename
+	@return     { description_of_the_return_value }
+	"""
+	import pickle
+	fr = codecs.open(filename, "rb")
+	return pickle.load(fr)
+
 if __name__ == '__main__':
 	my_data, labels = create_dataSet()
 	print(cal_shannonEnt(my_data))
-	print(create_tree(my_data, labels))
+	tree = create_tree(my_data, labels)
+	print(tree)
 
 	# test = [1,1,1,1,2,2,4,5,9,9,9,9,9]
 	# print(major_cnt(test))
+	file_path = "classifier.txt"
+	store_tree(tree, file_path)
+	print(grab_tree(file_path))
