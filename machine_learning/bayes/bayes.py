@@ -2,12 +2,13 @@
 # @Author: huzhu
 # @Date:   2019-09-19 20:43:50
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-09-25 21:55:37
+# @Last Modified time: 2019-09-28 17:58:09
 # @description p(ci|w) = p(w|ci)p(ci)/p(w)
 
 import re
 import codecs
 from numpy import *
+import feedparser
 
 def load_dataSet():
 	"""
@@ -153,9 +154,82 @@ def spam_test():
 			error_count += 1
 	print("the error rate is :", float(error_count) / len(testSet))
 
+
+def cal_most_freq(vocablist, full_text):
+	"""
+	@brief      计算出现频率
+	@param      vocablist  The vocablist
+	@param      full_text  The full text
+	@return     { description_of_the_return_value }
+	"""
+	freq_dict = dict()
+	for token in vocablist:
+		freq_dict[token] = full_text.count(token)
+	sorted_freq = sorted(freq_dict.items(), key = lambda x : x[1],reverse = True)
+	return sorted_freq[:30]
+
+
+def local_words(feed1, feed0):
+	"""
+	@brief      基于贝叶斯的广告区域倾向分类器
+	@param      feed1  The feed 1
+	@param      feed0  The feed 0
+	@return     { description_of_the_return_value }
+	"""
+	doc_list = list()
+	class_list = list()
+	full_text = list()
+
+	min_len = min(len(feed1["entries"]), len(feed0["entries"]))
+	for i in range(min_len):
+		word_list = text_parse(feed1["entries"][i]["summary"])
+		doc_list.append(word_list)
+		full_text.extend(word_list)
+		class_list.append(1)
+		word_list = text_parse(feed0["entries"][i]["summary"])
+		doc_list.append(word_list)
+		full_text.extend(word_list)
+		class_list.append(0)
+
+	vocablist = create_vocablist(doc_list)
+	# 去除频率最高的前30个单词
+	top30_words = cal_most_freq(vocablist, full_text)
+	for pair_word in top30_words:
+		if pair_word[0] in vocablist:
+			vocablist.remove(pair_word[0])
+
+	trainSet = list(range(2 * min_len))
+	print(len(trainSet))
+	testSet = list()
+	for i in range(20):
+		index = int(random.uniform(0,len(trainSet)))
+		print(index)
+		testSet.append(trainSet[index])
+		del(trainSet[index])
+
+	train_matrix = list()
+	train_category = list()
+	for doc_index in trainSet:
+		train_matrix.append(bag_of_words2vec(vocablist, doc_list[doc_index]))
+		train_categorya.append(class_list[doc_index])
+
+	p0, p1, pSpam = train(train_matrix, train_category)
+
+	error_count = 0
+	for doc_index in testSet:
+		word_vector = bag_of_words2vec(vocablist, doc_list[doc_index])
+		if classify(word_vector, p0,p1,pAb) != class_list[doc_index]:
+			error_count += 1
+	print("the error rate is :", float(error_count) / len(testSet))
+	return vocablist, p0, p1
+
 if __name__ == '__main__':
 	test()
 	spam_test()
+	feed1 = feedparser.parse("http://newyork.craigslist.org/stp/index.rss")
+	print (feed1)
+	feed0 = feedparser.parse("http://sfbay.craigslist.org/stp/index.rss")
+	local_words(feed1, feed0)
 
 
 
