@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-09-19 20:43:50
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-09-28 17:58:09
+# @Last Modified time: 2019-09-29 16:45:54
 # @description p(ci|w) = p(w|ci)p(ci)/p(w)
 
 import re
@@ -226,10 +226,9 @@ def local_words(feed1, feed0):
 if __name__ == '__main__':
 	test()
 	spam_test()
-	feed1 = feedparser.parse("http://newyork.craigslist.org/stp/index.rss")
-	print (feed1)
-	feed0 = feedparser.parse("http://sfbay.craigslist.org/stp/index.rss")
-	local_words(feed1, feed0)
+	# feed1 = feedparser.parse("http://newyork.craigslist.org/stp/index.rss")
+	# feed0 = feedparser.parse("http://sfbay.craigslist.org/stp/index.rss")
+	# local_words(feed1, feed0)
 
 
 
