@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-10-10 09:49:17
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-10-14 16:20:39
+# @Last Modified time: 2019-10-14 17:44:09
 
 import codecs
 import random
@@ -324,4 +324,5 @@ if __name__ == '__main__':
 	print (lable)
 	a = mat([1,2,3,4])
 	print(a)
+
 
