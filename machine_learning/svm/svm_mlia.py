@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-10-10 09:49:17
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-10-14 00:19:14
+# @Last Modified time: 2019-10-14 16:20:39
 
 import codecs
 import random
@@ -257,14 +257,14 @@ def innerL(i, os):
 
 def smoP(data_matin, class_labels, C, toler, max_iter, kTup = ("1in", 0)):
 	"""
-	@brief      { function_description }
+	@brief      完整的SMO算法
 	@param      data_matin    The data matin
 	@param      class_labels  The class labels
 	@param      C             { parameter_description }
 	@param      toler         The toler
 	@param      max_iter      The maximum iterator
 	@param      kTup          The k tup
-	@return     { description_of_the_return_value }
+	@return     b, alphas
 	"""
 	os = optStruct(mat(data_matin), mat(class_labels).transpose(), C, toler)
 	iter = 0 
@@ -290,15 +290,38 @@ def smoP(data_matin, class_labels, C, toler, max_iter, kTup = ("1in", 0)):
 		print("iteration number: %d" % iter)
 	return os.b, os.alphas
 
+def calc_ws(alphas, data_arr, class_labels):
+	"""
+	@brief      计算w的值
+	@param      alphas        The alphas
+	@param      data_arr      The data arr
+	@param      class_labels  The class labels
+	@return     The ws.
+	"""
+	X = mat(data_arr)
+	label_mat = mat(class_labels).transpose()
+	m, n = shape(X)
+	w = zeros((n, 1))
+	for i in range(m):
+		w += multiply(alphas[i] * label_mat[i, :], X[i, :].T)
+	return w
 
 if __name__ == '__main__':
-	data_mat, label_mat = load_dataSet("testSet.txt")
+	data_arr, label_arr = load_dataSet("testSet.txt")
 
-	b, alphas = smoP(data_mat, label_mat, 0.6, 0.001, 40)
+	b, alphas = smoP(data_arr, label_arr, 0.6, 0.001, 40)
 	print(b,alphas[alphas>0])
 	print(shape(alphas[alphas > 0]))
 	for i in range(100):
 		if alphas[i] > 0.0:
-			print(data_mat[i], label_mat[i])
+			print(data_arr[i], label_arr[i])
 
+	w = calc_ws(alphas, data_arr, label_arr)
+	print(w)
+	# 检查数据的正确性
+	data_mat = mat(data_arr)
+	lable = data_mat[49] * mat(w) + b
+	print (lable)
+	a = mat([1,2,3,4])
+	print(a)
 
