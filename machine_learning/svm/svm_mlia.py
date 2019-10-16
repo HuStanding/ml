@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-10-10 09:49:17
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-10-14 17:44:09
+# @Last Modified time: 2019-10-16 15:00:44
 
 import codecs
 import random
@@ -24,7 +24,8 @@ def load_dataSet(filename):
 			label_mat.append(float(line_arr[2]))
 	return data_mat, label_mat
 
-def select_j_rand(i ,m):
+
+def select_j_rand(i, m):
 	"""
 	@brief      随机选取j的值
 	@param      i     alpha_i的下标
@@ -35,6 +36,7 @@ def select_j_rand(i ,m):
 	while(j == i):
 		j = int(random.uniform(0, m))
 	return j
+
 
 def clap_alpha(aj, H, L):
 	"""
@@ -50,100 +52,26 @@ def clap_alpha(aj, H, L):
 		aj = L
 	return aj
 
-def smo_simple(data_mat_in, class_labels, C, toler, max_iter):
-	"""
-	@brief      简易SMO算法
-	@param      data_mat_in   输入的数据
-	@param      class_labels  输入数据标签
-	@param      C             惩罚参数
-	@param      toler         经度
-	@param      max_iter      最大迭代次数
-	@return     alphas值和b值
-	"""
-	data_matrix = mat(data_mat_in)
-	label_mat = mat(class_labels).transpose()
-	b = 0    # 初始化常数项
-	m, n = shape(data_matrix)  # 获取输入数据的个数和维度
-	alphas = mat(zeros((m, 1)))  # 初始化alphas的值为0
-	iter = 0 
-	while(iter < max_iter):
-		alpha_pairs_changed = 0   # 记录alpha是否被优化
-		for i in range(m):
-			# 计算预测值
-			fXi = float(multiply(alphas, label_mat).T * (data_matrix * data_matrix[i, :].T)) + b
-			# 计算误差值
-			Ei = fXi - float(label_mat[i])
-			# 如果alpha可以更改进入优化过程
-			if ((label_mat[i] * Ei < -toler) and (alphas[i] < C)) or \
-				((label_mat[i] * Ei > toler) and (alphas[i] > 0)):
-				# 随机选择j的值
-				j = select_j_rand(i, m)
-				fXj = float(multiply(alphas, label_mat).T * (data_matrix * data_matrix[j, :].T)) + b
-				# 计算误差值
-				Ej = fXj - float(label_mat[j])
-				alpha_Iold = alphas[i].copy()
-				alpha_Jold = alphas[j].copy()
-				# 确定最优值的取值上下界
-				if (label_mat[i] != label_mat[j]):
-					L = max(0, alphas[j] - alphas[i])
-					H = min(C, C + alphas[j] - alphas[i])
-				else:
-					L = max(0, alphas[j] + alphas[i] - C)
-					H = min(C, C + alphas[j] + alphas[i])
-				if L == H:
-					print("L == H")
-					continue
-
-				# 计算η的值
-				eta = 2 * data_matrix[i, :] * data_matrix[j, :].T - \
-					  data_matrix[i, :] * data_matrix[i, :].T -data_matrix[j, :] * data_matrix[j, :].T
-				if eta >= 0:
-					print("eta >= 0")
-					continue
-
-				# 计算新的alpha的值
-				alphas[j] -= label_mat[j] * (Ei - Ej) / eta
-				alphas[j] = clap_alpha(alphas[j], H, L)
-				if abs(alphas[j] - alpha_Jold) < 0.0001:
-					print("j not moving enough")
-					continue
-				alphas[i] = alpha_Iold + label_mat[j] * label_mat[i] * (alpha_Jold - alphas[j])
-
-				# 更新b的值
-				b1 = b - Ei - label_mat[i] *(alphas[i] - alpha_Iold) * data_matrix[i, :] * data_matrix[i, :].T \
-					 - label_mat[j] * (alphas[j] - alpha_Jold) * data_matrix[i,: ] * data_matrix[j, :].T
-				b2 = b - Ej - label_mat[i] *(alphas[i] - alpha_Iold) * data_matrix[i, :] * data_matrix[j, :].T \
-					 - label_mat[j] * (alphas[j] - alpha_Jold) * data_matrix[j,: ] * data_matrix[j, :].T
-				if (alphas[i] > 0) and (alphas[i] < C):
-					b = b1
-				elif (alphas[j] > 0) and (alphas[j] < C):
-					b = b2
-				else:
-					b = (b1 + b2) / 2
-
-				# 增加迭代次数
-				alpha_pairs_changed += 1 
-				print("iter: %d i:%d, pairs changed %d" % (iter, i, alpha_pairs_changed))
-		if alpha_pairs_changed == 0:
-			iter += 1 
-		else:
-			print("iteration number: %d" % iter)
-	return b, alphas
 
 class optStruct():
 	"""
 	@brief      存储一些关键数据
 	"""
-	def __init__(self, data_matin, class_labels, C, toler):
+	def __init__(self, data_matin, class_labels, C, toler, kTup):
 		self.X = data_matin
 		self.label_mat = class_labels
 		self.C = C
 		self.tol = toler
 		self.m = shape(data_matin)[0]
-		self.alphas = mat(zeros((self.m , 1)))
+		self.alphas = mat(zeros((self.m, 1)))
 		self.b = 0
 		# 误差缓存,第一列是eCache是否有效的标志位，第二列是实际的E值
-		self.eCache = mat(zeros((self.m , 2)))
+		self.eCache = mat(zeros((self.m, 2)))
+		# 核函数结果矩阵
+		self.K = mat(zeros((self.m, self.m)))
+		for j in range(self.m):
+			self.K[:, j] = kernel_trans(self.X, self.X[j, :], kTup)
+
 
 def calc_Ek(os, k):
 	"""
@@ -152,9 +80,10 @@ def calc_Ek(os, k):
 	@param      k	  下标
 	@return     Ek的值
 	"""
-	fXk = float(multiply(os.alphas, os.label_mat).T * (os.X * os.X[k,:].T)) + os.b
+	fXk = float(multiply(os.alphas, os.label_mat).T * os.K[:, k] + os.b)
 	Ek = fXk - float(os.label_mat[k])
 	return Ek
+
 
 def select_j(i, os, Ei):
 	"""
@@ -180,18 +109,19 @@ def select_j(i, os, Ei):
 				max_K = k
 				max_deltaE = deltaE
 				Ej = Ek
-			return max_K, Ej
+		return max_K, Ej
 	else:
 		j = select_j_rand(i, os.m)
 		Ej = calc_Ek(os, j)
 	return j, Ej
 
+
 def update_Ek(os, k):
 	"""
 	@brief      计算误差值并存入缓存中
-	@param      os    
-	@param      k     
-	@return     
+	@param      os
+	@param      k
+	@return
 	"""
 	Ek = calc_Ek(os, k)
 	os.eCache[k] = [1, Ek]
@@ -203,7 +133,7 @@ def innerL(i, os):
 	@param      os    The operating system
 	@return     { description_of_the_return_value }
 	"""
-	Ei = calc_Ek(os ,i)
+	Ei = calc_Ek(os, i)
 	if ((os.label_mat[i] * Ei < -os.tol) and (os.alphas[i] < os.C)) or \
 	   ((os.label_mat[i] * Ei > os.tol) and (os.alphas[i] > 0)):
 		# 随机选择j的值
@@ -217,13 +147,13 @@ def innerL(i, os):
 			H = min(os.C, os.C + os.alphas[j] - os.alphas[i])
 		else:
 			L = max(0, os.alphas[j] + os.alphas[i] - os.C)
-			H = min(os.C, os.C + os.alphas[j] + os.alphas[i])
+			H = min(os.C, os.alphas[j] + os.alphas[i])
 		if L == H:
 			print("L == H")
 			return 0
 
 		# 计算η的值
-		eta = 2 * os.X[i, :] * os.X[j, :].T - os.X[i, :] * os.X[i, :].T -os.X[j, :] * os.X[j, :].T
+		eta = 2.0 * os.K[i, j] - os.K[i, i] - os.K[j, j]
 		if eta >= 0:
 			print("eta >= 0")
 			return 0
@@ -233,29 +163,26 @@ def innerL(i, os):
 		os.alphas[j] = clap_alpha(os.alphas[j], H, L)
 		update_Ek(os, j)
 
-		if abs(os.alphas[j] - alpha_Jold) < 0.0001:
+		if abs(os.alphas[j] - alpha_Jold) < 0.00001:
 			print("j not moving enough")
 			return 0
 		os.alphas[i] = alpha_Iold + os.label_mat[j] * os.label_mat[i] * (alpha_Jold - os.alphas[j])
 		update_Ek(os, i)
 
 		# 更新b的值
-		b1 = os.b - Ei - os.label_mat[i] *(os.alphas[i] - alpha_Iold) * os.X[i, :] * os.X[i, :].T \
-			 - os.label_mat[j] * (os.alphas[j] - alpha_Jold) * os.X[i,: ] * os.X[j, :].T
-		b2 = os.b - Ej - os.label_mat[i] *(os.alphas[i] - alpha_Iold) * os.X[i, :] * os.X[j, :].T \
-			 - os.label_mat[j] * (os.alphas[j] - alpha_Jold) * os.X[j,: ] * os.X[j, :].T
+		b1 = os.b - Ei - os.label_mat[i] * (os.alphas[i] - alpha_Iold) * os.K[i, i] - os.label_mat[j] * (os.alphas[j] - alpha_Jold) * os.K[i, j]
+		b2 = os.b - Ej - os.label_mat[i] * (os.alphas[i] - alpha_Iold) * os.K[i, j] - os.label_mat[j] * (os.alphas[j] - alpha_Jold) * os.K[j, j]
 		if (os.alphas[i] > 0) and (os.alphas[i] < os.C):
 			os.b = b1
 		elif (os.alphas[j] > 0) and (os.alphas[j] < os.C):
 			os.b = b2
 		else:
-			os.b = (b1 + b2) / 2
+			os.b = (b1 + b2) / 2.0
 		return 1
 	else:
 		return 0
 
-
-def smoP(data_matin, class_labels, C, toler, max_iter, kTup = ("1in", 0)):
+def smoP(data_matin, class_labels, C, toler, max_iter, kTup=("lin", 0)):
 	"""
 	@brief      完整的SMO算法
 	@param      data_matin    The data matin
@@ -266,8 +193,8 @@ def smoP(data_matin, class_labels, C, toler, max_iter, kTup = ("1in", 0)):
 	@param      kTup          The k tup
 	@return     b, alphas
 	"""
-	os = optStruct(mat(data_matin), mat(class_labels).transpose(), C, toler)
-	iter = 0 
+	os = optStruct(mat(data_matin), mat(class_labels).transpose(), C, toler, kTup)
+	iter = 0
 	entire_set = True
 	alpha_pairs_changed = 0
 	while (iter < max_iter) and ((alpha_pairs_changed > 0) or (entire_set)):
@@ -275,20 +202,23 @@ def smoP(data_matin, class_labels, C, toler, max_iter, kTup = ("1in", 0)):
 		if entire_set:
 			for i in range(os.m):
 				alpha_pairs_changed += innerL(i, os)
-				print("fullset, iter: %d i:%d, pairs changed %d" % (iter, i, alpha_pairs_changed)) 
-			iter += 1 
+				print("fullset, iter: %d i:%d, pairs changed %d" %
+				      (iter, i, alpha_pairs_changed))
+			iter += 1
 		else:
 			non_boundIs = nonzero((os.alphas.A > 0) * (os.alphas.A < C))[0]
 			for i in non_boundIs:
 				alpha_pairs_changed += innerL(i, os)
-				print("non-bound, iter: %d i:%d, pairs changed %d" % (iter, i, alpha_pairs_changed)) 
-			iter += 1 
+				print("non-bound, iter: %d i:%d, pairs changed %d" %
+				      (iter, i, alpha_pairs_changed))
+			iter += 1
 		if entire_set:
 			entire_set = False
 		elif alpha_pairs_changed == 0:
 			entire_set = True
 		print("iteration number: %d" % iter)
 	return os.b, os.alphas
+
 
 def calc_ws(alphas, data_arr, class_labels):
 	"""
@@ -306,12 +236,131 @@ def calc_ws(alphas, data_arr, class_labels):
 		w += multiply(alphas[i] * label_mat[i, :], X[i, :].T)
 	return w
 
-if __name__ == '__main__':
+
+def kernel_trans(X, A, kTup):
+	"""
+	@brief      核函数计算
+	@param      X     输入数据
+	@param      A     第i行的数据
+	@param      kTup  核函数类型
+	@return     计算的核函数矩阵的第i列
+	"""
+	m, n = shape(X)
+	K = mat(zeros((m, 1)))
+	if kTup[0] == "lin":
+		# 线型核函数
+		K = X * A.T
+	elif kTup[0] == "rbf":
+		# 高斯径向基核函数
+		for j in range(m):
+			delta_row = X[j] - A
+			K[j] = delta_row * delta_row.T
+		K = exp(K / (-1 * kTup[1] ** 2))
+	else:
+		raise NameError("Houston We Have a Problem -- That Kernel is not recognized")
+	return K
+
+
+'''#######********************************
+Non-Kernel VErsions below
+'''#######********************************
+def smo_simple(data_mat_in, class_labels, C, toler, max_iter):
+	"""
+	@brief      简易SMO算法
+	@param      data_mat_in   输入的数据
+	@param      class_labels  输入数据标签
+	@param      C             惩罚参数
+	@param      toler         经度
+	@param      max_iter      最大迭代次数
+	@return     alphas值和b值
+	"""
+	data_matrix = mat(data_mat_in)
+	label_mat = mat(class_labels).transpose()
+	b = 0    # 初始化常数项
+	m, n = shape(data_matrix)  # 获取输入数据的个数和维度
+	alphas = mat(zeros((m, 1)))  # 初始化alphas的值为0
+	iter = 0
+	while(iter < max_iter):
+		alpha_pairs_changed = 0   # 记录alpha是否被优化
+		for i in range(m):
+			# 计算预测值
+			fXi = float(multiply(alphas, label_mat).T *
+			            (data_matrix * data_matrix[i, :].T)) + b
+			# 计算误差值
+			Ei = fXi - float(label_mat[i])
+			# 如果alpha可以更改进入优化过程
+			if ((label_mat[i] * Ei < -toler) and (alphas[i] < C)) or \
+				((label_mat[i] * Ei > toler) and (alphas[i] > 0)):
+				# 随机选择j的值
+				j = select_j_rand(i, m)
+				fXj = float(multiply(alphas, label_mat).T *
+				            (data_matrix * data_matrix[j, :].T)) + b
+				# 计算误差值
+				Ej = fXj - float(label_mat[j])
+				alpha_Iold = alphas[i].copy()
+				alpha_Jold = alphas[j].copy()
+				# 确定最优值的取值上下界
+				if (label_mat[i] != label_mat[j]):
+					L = max(0, alphas[j] - alphas[i])
+					H = min(C, C + alphas[j] - alphas[i])
+				else:
+					L = max(0, alphas[j] + alphas[i] - C)
+					H = min(C, C + alphas[j] + alphas[i])
+				if L == H:
+					print("L == H")
+					continue
+
+				# 计算η的值
+				eta = 2 * data_matrix[i, :] * data_matrix[j, :].T - \
+					  data_matrix[i, :] * data_matrix[i, :].T - \
+					      data_matrix[j, :] * data_matrix[j, :].T
+				if eta >= 0:
+					print("eta >= 0")
+					continue
+
+				# 计算新的alpha的值
+				alphas[j] -= label_mat[j] * (Ei - Ej) / eta
+				alphas[j] = clap_alpha(alphas[j], H, L)
+				if abs(alphas[j] - alpha_Jold) < 0.0001:
+					print("j not moving enough")
+					continue
+				alphas[i] = alpha_Iold + label_mat[j] * \
+				    label_mat[i] * (alpha_Jold - alphas[j])
+
+				# 更新b的值
+				b1 = b - Ei - label_mat[i] * (alphas[i] - alpha_Iold) * data_matrix[i, :] * data_matrix[i, :].T \
+					 - label_mat[j] * (alphas[j] - alpha_Jold) * \
+					                   data_matrix[i, :] * data_matrix[j, :].T
+				b2 = b - Ej - label_mat[i] * (alphas[i] - alpha_Iold) * data_matrix[i, :] * data_matrix[j, :].T \
+					 - label_mat[j] * (alphas[j] - alpha_Jold) * \
+					                   data_matrix[j, :] * data_matrix[j, :].T
+				if (alphas[i] > 0) and (alphas[i] < C):
+					b = b1
+				elif (alphas[j] > 0) and (alphas[j] < C):
+					b = b2
+				else:
+					b = (b1 + b2) / 2
+
+				# 增加迭代次数
+				alpha_pairs_changed += 1
+				print("iter: %d i:%d, pairs changed %d" % (iter, i, alpha_pairs_changed))
+		if alpha_pairs_changed == 0:
+			iter += 1
+		else:
+			print("iteration number: %d" % iter)
+	return b, alphas
+
+def test_smo():
+	"""
+	@brief      SMO 测试算法
+	@return     无
+	"""
 	data_arr, label_arr = load_dataSet("testSet.txt")
 
 	b, alphas = smoP(data_arr, label_arr, 0.6, 0.001, 40)
-	print(b,alphas[alphas>0])
+	print(b, alphas[alphas > 0])
 	print(shape(alphas[alphas > 0]))
+	# 打印支持向量
 	for i in range(100):
 		if alphas[i] > 0.0:
 			print(data_arr[i], label_arr[i])
@@ -319,10 +368,60 @@ if __name__ == '__main__':
 	w = calc_ws(alphas, data_arr, label_arr)
 	print(w)
 	# 检查数据的正确性
+	error_count = 0
 	data_mat = mat(data_arr)
-	lable = data_mat[49] * mat(w) + b
-	print (lable)
-	a = mat([1,2,3,4])
-	print(a)
+	m, n = shape(data_mat)
+	for i in range(m):
+		predict = data_mat[i] * mat(w) + b
+		if sign(predict) != sign(label_arr[i]):
+			error_count += 1
+	print("the training error rate is :%f" % (float(error_count) / m))
+
+
+def test_rbf(k1=1.3):
+	"""
+	@brief      测试核函数
+	@param      k1
+	@return     无
+	"""
+	data_arr, label_arr = load_dataSet("testSetRBF.txt")
+	b, alphas = smoP(data_arr, label_arr, 200, 0.0001, 10000, ("rbf", k1))
+	print(b)
+	data_mat = mat(data_arr)
+	label_mat = mat(label_arr).transpose()
+	# 获取支撑向量
+	svIndex = nonzero(alphas.A > 0)[0]
+	print(svIndex)
+	sVs = data_mat[svIndex]
+	labelSV = label_mat[svIndex]
+	print("there are %d Support Vectors" % shape(sVs)[0])
+	m, n = shape(data_mat)
+	error_count = 0
+	# 计算训练数据集的误差
+	for i in range(m):
+		kernel_eval = kernel_trans(sVs, data_mat[i, :], ("rbf", k1))
+		predict = kernel_eval.T * multiply(labelSV, alphas[svIndex]) + b
+		if sign(predict) != sign(label_arr[i]):
+			error_count += 1
+	print("the training error rate is :%f" %(float(error_count) / m))
+
+	# 计算测试数据集的误差
+	data_arr, label_arr = load_dataSet("testSetRBF2.txt")
+	data_mat = mat(data_arr)
+	label_mat = mat(label_arr).transpose()
+	m, n = shape(data_mat)
+	error_count = 0
+	for i in range(m):
+		kernel_eval = kernel_trans(sVs, data_mat[i, :], ("rbf", k1))
+		predict = kernel_eval.T * multiply(alphas[svIndex], labelSV) + b
+		if sign(predict) != sign(label_arr[i]):
+			error_count += 1
+
+	print("the test error rate is :%f"  %(float(error_count) / m))
+
+
+if __name__ == '__main__':
+	# test_smo()
+	test_rbf()
 
 
