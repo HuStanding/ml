@@ -2,12 +2,13 @@
 # @Author: huzhu
 # @Date:   2019-10-14 20:51:30
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-10-14 21:18:38
+# @Last Modified time: 2019-10-17 11:55:22
 
 import numpy as np
 import matplotlib.pyplot as plt
 import math
 import random
+import time
 from scipy.spatial import KDTree
 
 
@@ -114,7 +115,7 @@ def dbscan(dataSet, eps, minPts):
     k = -1
     C = [-1 for i in range(nPoints)]
     # 构建KD-Tree，并生成所有距离<=eps的点集合
-    kd = KDTree(X)
+    kd = KDTree(dataSet)
     while(vPoints.unvisitednum>0):
         # (3) 随机选择一个unvisited对象p
         p = random.choice(vPoints.unvisitedlist)
@@ -154,23 +155,37 @@ def dbscan(dataSet, eps, minPts):
     # (16) until没有标记为unvisited的对象
     return C
 
+def test():
+    """
+    @brief      利用sklearn包计算DNSCAN
+    @return     { description_of_the_return_value }
+    """
+
 if __name__ == '__main__':
     import numpy as np
     import matplotlib.pyplot as plt
     from sklearn import datasets
+    from sklearn.cluster import DBSCAN
     X1, Y1 = datasets.make_circles(n_samples=2000, factor=0.6, noise=0.05,
                                    random_state=1)
     X2, Y2 = datasets.make_blobs(n_samples=500, n_features=2, centers=[[1.5,1.5]],
                                  cluster_std=[[0.1]], random_state=5)
     X = np.concatenate((X1, X2))
+    print(type(X))
     plt.figure(figsize=(15, 6), dpi=80)
     plt.subplot(121)
     plt.scatter(X[:,0], X[:,1], marker='.')
 
     # 获取集合簇
     plt.subplot(122)
-    C = dbscan(X, 0.1, 10)
-    colors = ["r", "g", "b", 'c', 'm', 'y', 'k', 'w']
-    for i in range(X.shape[0]):
-        plt.scatter(X[i][0], X[i][1], c = colors[C[i]])
-    plt.show()
+    start = time.time()
+    #C = dbscan(X, 0.1, 10) 
+    #C = DBSCAN(eps = 0.1, min_samples = 10).fit_predict(X)
+    C = DBSCAN(eps = 0.1, min_samples = 10).fit(X)
+    print(C.components_)
+    end = time.time()
+    print(end-start)
+    # colors = ["r", "g", "b", 'c', 'm', 'y', 'k', 'w']
+    # for i in range(X.shape[0]):
+    #     plt.scatter(X[i][0], X[i][1], c = colors[C[i]])
+    # plt.show()
