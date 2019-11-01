@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-09-19 20:43:50
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-09-29 16:45:54
+# @Last Modified time: 2019-10-31 11:07:59
 # @description p(ci|w) = p(w|ci)p(ci)/p(w)
 
 import re
