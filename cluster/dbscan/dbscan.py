@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-10-14 20:51:30
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-08 21:16:50
+# @Last Modified time: 2019-11-11 21:10:47
 
 from numpy import *
 import numpy as np
@@ -42,7 +42,6 @@ def dist(a, b):
     """
     return math.sqrt(np.power(a-b, 2).sum())
 
-    
 def dbscan_simple(dataSet, eps, minPts):
     """
     @brief      简易DBScan算法
@@ -77,7 +76,6 @@ def dbscan_simple(dataSet, eps, minPts):
         else:
             C[p]=-1
     return C
-
 
 def dbscan(dataSet, eps, minPts):
     """
@@ -165,7 +163,7 @@ def plot_diff_eps():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    plt.title("eps = 0.05, min_pts = 5, cluster = {}".format(str(k)))
+    plt.title("eps = 0.05, min_pts = 5, cluster = {}".format(str(k)), fontsize=15)
 
     plt.subplot(222)
     C = dbscan_lib(X, 0.08, 5)
@@ -174,7 +172,7 @@ def plot_diff_eps():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    plt.title("eps = 0.08, min_pts = 5, cluster = {}".format(str(k)))
+    plt.title("eps = 0.1, min_pts = 5, cluster = {}".format(str(k)), fontsize=15)
 
     plt.subplot(223)
     C = dbscan_lib(X, 0.1, 5)
@@ -183,7 +181,7 @@ def plot_diff_eps():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    plt.title("eps = 0.1, min_pts = 5, cluster = {}".format(str(k)))
+    plt.title("eps = 0.15, min_pts = 5, cluster = {}".format(str(k)), fontsize=15)
 
     plt.subplot(224)
     C = dbscan_lib(X, 0.15, 5)
@@ -192,7 +190,7 @@ def plot_diff_eps():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col), markersize=5)
-    plt.title("eps = 0.15, min_pts = 5, cluster = {}".format(str(k)))
+    plt.title("eps = 0.2, min_pts = 5, cluster = {}".format(str(k)), fontsize=15)
     plt.show()
 
 def plot_diff_minpts():
@@ -207,7 +205,7 @@ def plot_diff_minpts():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    plt.title("eps = 0.1, min_pts = 5, cluster = {}".format(str(k)))
+    plt.title("eps = 0.1, min_pts = 5, cluster = {}".format(str(k)), fontsize=15)
 
 
     plt.subplot(222)
@@ -219,7 +217,7 @@ def plot_diff_minpts():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    plt.title("eps = 0.1, min_pts = 10, cluster = {}".format(str(k)))
+    plt.title("eps = 0.1, min_pts = 10, cluster = {}".format(str(k)), fontsize=15)
 
     plt.subplot(223)
     C = dbscan_lib(X, 0.1, 15)
@@ -230,7 +228,7 @@ def plot_diff_minpts():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    plt.title("eps = 0.1, min_pts = 15, cluster = {}".format(str(k)))
+    plt.title("eps = 0.1, min_pts = 15, cluster = {}".format(str(k)), fontsize=15)
 
     plt.subplot(224)
     C = dbscan_lib(X, 0.1, 20)
@@ -241,11 +239,11 @@ def plot_diff_minpts():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(C == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col), markersize=5)
-    plt.title("eps = 0.1, min_pts = 20, cluster = {}".format(str(k)))
+    plt.title("eps = 0.1, min_pts = 20, cluster = {}".format(str(k)), fontsize=15)
     plt.show()
 
 if __name__ == '__main__':
-    #plot_diff_minpts()
+    plot_diff_minpts()
     #plot_diff_eps()
-    plot_test()
+    #plot_test()
     

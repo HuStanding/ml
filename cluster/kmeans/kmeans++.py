@@ -3,7 +3,7 @@
 # @Author: huzhu
 # @Date:   2019-10-29 09:31:43
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-05 09:18:48
+# @Last Modified time: 2019-11-11 21:22:13
 
 import codecs
 from numpy import *
@@ -121,7 +121,7 @@ def plot_cluster(data_mat, cluste_assment, centroid):
 	plt.figure(figsize=(15, 6), dpi=80)
 	plt.subplot(121)
 	plt.plot(data_mat[:, 0], data_mat[:, 1], 'o')
-	plt.title("source data")
+	plt.title("source data", fontsize=15)
 	plt.subplot(122)
 	k = shape(centroid)[0]
 	colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
@@ -131,7 +131,7 @@ def plot_cluster(data_mat, cluste_assment, centroid):
 	             markeredgecolor='k', markersize=10)
 	for i in range(k):
 		plt.plot(centroid[:,0], centroid[:,1], '+', color = 'k', markersize=18)
-	plt.title("Kpp-Means Cluster, k = 3")
+	plt.title("k-Means++ Cluster, k = 3", fontsize=15)
 	plt.show()
 
 
@@ -139,6 +139,8 @@ if __name__ == '__main__':
 	#data_mat = mat(load_data("data/testSet_kmeans.txt"))
 	data_mat = mat(load_data("data/testSet2_kmeans.txt"))
 	centroid, cluster_assment = kpp_Means(data_mat, 3)
+	sse = sum(cluster_assment[:,1])
+	print("sse is ", sse)
 	plot_cluster(data_mat, cluster_assment, centroid)
 
 

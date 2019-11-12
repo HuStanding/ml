@@ -3,13 +3,14 @@
 # @Author: huzhu
 # @Date:   2019-10-29 09:31:43
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-05 10:02:37
+# @Last Modified time: 2019-11-12 20:10:19
 
 import codecs
 from numpy import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.datasets import make_moons
+import matplotlib.animation as animation
 
 def load_data(path):
 	"""
@@ -34,6 +35,21 @@ def dist_eucl(vecA, vecB):
 	"""
 	return sqrt(sum(power(vecA - vecB, 2)))
 
+def rand_cent(data_mat, k):
+	"""
+	@brief      select random centroid
+	@param      data_mat  The data matrix
+	@param      k
+	@return     centroids
+	"""
+	n = shape(data_mat)[1]
+	centroids = mat(zeros((k, n)))
+	for j in range(n):
+		minJ = min(data_mat[:,j]) 
+		rangeJ = float(max(data_mat[:,j]) - minJ)
+		centroids[:,j] = mat(minJ + rangeJ * random.rand(k,1))
+	return centroids
+
 def kMeans(data_mat, k, dist = "dist_eucl", create_cent = "rand_cent"):
 	"""
 	@brief      kMeans algorithm
@@ -45,7 +61,7 @@ def kMeans(data_mat, k, dist = "dist_eucl", create_cent = "rand_cent"):
 	"""
 	m = shape(data_mat)[0]
 	# 初始化点的簇
-	cluste_assment = mat(zeros((m, 2)))  # 类别，距离
+	cluster_assment = mat(zeros((m, 2)))  # 类别，距离
 	# 随机初始化聚类初始点
 	centroid = eval(create_cent)(data_mat, k)
 	cluster_changed = True
@@ -60,37 +76,37 @@ def kMeans(data_mat, k, dist = "dist_eucl", create_cent = "rand_cent"):
 				if distance < min_dist:
 					min_dist = distance
 					min_index = j
-			if cluste_assment[i, 0] != min_index:
+			if cluster_assment[i, 0] != min_index:
 				cluster_changed = True
-				cluste_assment[i, :] = min_index, min_dist**2
+				cluster_assment[i, :] = min_index, min_dist**2
 		# 计算簇中所有点的均值并重新将均值作为质心
 		for j in range(k):
-			per_data_set = data_mat[nonzero(cluste_assment[:,0].A == j)[0]]
+			per_data_set = data_mat[nonzero(cluster_assment[:,0].A == j)[0]]
 			centroid[j, :] = mean(per_data_set, axis = 0)
-	return centroid, cluste_assment
+	return centroid, cluster_assment
 
-def plot_cluster(data_mat, cluste_assment, centroid):
+def plot_cluster(data_mat, cluster_assment, centroid):
 	"""
 	@brief      plot cluster and centroid
 	@param      data_mat        The data matrix
-	@param      cluste_assment  The cluste assment
+	@param      cluster_assment  The cluste assment
 	@param      centroid        The centroid
 	@return     
 	"""
 	plt.figure(figsize=(15, 6), dpi=80)
 	plt.subplot(121)
 	plt.plot(data_mat[:, 0], data_mat[:, 1], 'o')
-	plt.title("source data")
+	plt.title("source data", fontsize=15)
 	plt.subplot(122)
 	k = shape(centroid)[0]
 	colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
 	for i, col in zip(range(k), colors):
-	    per_data_set = data_mat[nonzero(cluste_assment[:,0].A == i)[0]]
+	    per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
 	    plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),
 	             markeredgecolor='k', markersize=10)
 	for i in range(k):
 		plt.plot(centroid[:,0], centroid[:,1], '+', color = 'k', markersize=18)
-	plt.title("K-Means Cluster, k = 3")
+	plt.title("K-Means Cluster, k = 3", fontsize=15)
 	plt.show()
 
 def plot_noncov():
@@ -119,64 +135,122 @@ def plot_noncov():
 def test_diff_k():
 	plt.figure(figsize=(15, 4), dpi=80)
 	data_mat = mat(load_data("data/testSet2_kmeans.txt"))
-	centroid, cluste_assment = kMeans(data_mat, 2)
+	centroid, cluster_assment = kMeans(data_mat, 2)
 	plt.subplot(131)
 	k = shape(centroid)[0]
 	colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
 	for i, col in zip(range(k), colors):
-	    per_data_set = data_mat[nonzero(cluste_assment[:,0].A == i)[0]]
+	    per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
 	    plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),
 	             markeredgecolor='k', markersize=10)
 	for i in range(k):
 		plt.plot(centroid[:,0], centroid[:,1], '+', color = 'k', markersize=18)
-	plt.title("K-Means Cluster, k = 2")
+	plt.title("K-Means Cluster, k = 2", fontsize=15)
 	
-	centroid, cluste_assment = kMeans(data_mat, 3)
+	centroid, cluster_assment = kMeans(data_mat, 3)
 	plt.subplot(132)
 	k = shape(centroid)[0]
 	colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
 	for i, col in zip(range(k), colors):
-	    per_data_set = data_mat[nonzero(cluste_assment[:,0].A == i)[0]]
+	    per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
 	    plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),
 	             markeredgecolor='k', markersize=10)
 	for i in range(k):
 		plt.plot(centroid[:,0], centroid[:,1], '+', color = 'k', markersize=18)
-	plt.title("K-Means Cluster, k = 3")
+	plt.title("K-Means Cluster, k = 3", fontsize=15)
 
-	centroid, cluste_assment = kMeans(data_mat, 4)
+	centroid, cluster_assment = kMeans(data_mat, 4)
 	plt.subplot(133)
 	k = shape(centroid)[0]
 	colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
 	for i, col in zip(range(k), colors):
-	    per_data_set = data_mat[nonzero(cluste_assment[:,0].A == i)[0]]
+	    per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
 	    plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),
 	             markeredgecolor='k', markersize=10)
 	for i in range(k):
 		plt.plot(centroid[:,0], centroid[:,1], '+', color = 'k', markersize=18)
-	plt.title("K-Means Cluster, k = 4")
+	plt.title("K-Means Cluster, k = 4", fontsize=15)
 	plt.show()
 
-def rand_cent(data_mat, k):
+def plot_fig(data_mat):
 	"""
-	@brief      select random centroid
+	@brief      绘制并保存gif图
 	@param      data_mat  The data matrix
-	@param      k
-	@return     centroids
+	@param      k         { parameter_description }
+	@return     { description_of_the_return_value }
 	"""
-	n = shape(data_mat)[1]
-	centroids = mat(zeros((k, n)))
-	for j in range(n):
-		minJ = min(data_mat[:,j]) 
-		rangeJ = float(max(data_mat[:,j]) - minJ)
-		centroids[:,j] = mat(minJ + rangeJ * random.rand(k,1))
-	return centroids
+	centroid_list = list()
+	cluster_assment_list = list()
+	def sub_kMeans(data_mat, k, dist = "dist_eucl", create_cent = "rand_cent"):
+		"""
+		@brief      kMeans algorithm
+		@param      data_mat     The data matrix
+		@param      k            num of cluster
+		@param      dist         The distance funtion
+		@param      create_cent  The create centroid function
+		@return     the cluster
+		"""
+		m = shape(data_mat)[0]
+		# 初始化点的簇
+		cluster_assment = mat(zeros((m, 2)))  # 类别，距离
+		# 随机初始化聚类初始点
+		centroid = eval(create_cent)(data_mat, k)
+		cluster_changed = True
+		# 遍历每个点
+		while cluster_changed:
+			centroid_list.append(array(centroid))
+			cluster_assment_list.append(array(cluster_assment))
+			cluster_changed = False
+			for i in range(m):
+				min_index = -1
+				min_dist = inf
+				for j in range(k):
+					distance = eval(dist)(data_mat[i, :], centroid[j, :])
+					if distance < min_dist:
+						min_dist = distance
+						min_index = j
+				if cluster_assment[i, 0] != min_index:
+					cluster_changed = True
+					cluster_assment[i, :] = min_index, min_dist**2
+			# 计算簇中所有点的均值并重新将均值作为质心
+			for j in range(k):
+				per_data_set = data_mat[nonzero(cluster_assment[:,0].A == j)[0]]
+				centroid[j, :] = mean(per_data_set, axis = 0)
+		return centroid_list,cluster_assment_list
+
+	centroid_list,cluster_assment_list = sub_kMeans(data_mat,4)
+
+	fig, ax = plt.subplots()
+	plt.scatter(data_mat[:, 0].flatten().A[0], data_mat[:, 1].flatten().A[0])
+	plt.title("K-Means Cluster Process", fontsize=15)
+	def update(i):
+		try:
+			ax.lines.pop()
+		except Exception:
+			pass
+		centroid = matrix(centroid_list[i])
+		cluster_assment = matrix(cluster_assment_list[i])
+		k = shape(centroid)[0]
+		colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
+		for i, col in zip(range(k), colors):
+			per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
+			line, =plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markeredgecolor='k', markersize=10)
+		line, = plt.plot(centroid[:,0], centroid[:,1], '*', color = 'k', markersize=18)
+		return line,
+
+	anim = animation.FuncAnimation(fig, update, frames=len(centroid_list),interval=1000, repeat_delay=1000)
+	plt.show() 
+	anim.save('test_animation.gif',writer='pillow')
 
 if __name__ == '__main__':
-	#data_mat = mat(load_data("data/testSet_kmeans.txt"))
+	data_mat = mat(load_data("data/testSet_kmeans.txt"))
 	#data_mat = mat(load_data("data/testSet2_kmeans.txt"))
-	data_mat,c = make_moons(n_samples=1000,noise=0.1)  
-	centroid, cluste_assment = kMeans(data_mat, 2)
-	plot_cluster(data_mat, cluste_assment, centroid)
+	#data_mat,c = make_moons(n_samples=1000,noise=0.1)  
+	centroid, cluster_assment = kMeans(data_mat, 4)
+	sse = sum(cluster_assment[:,1])
+	print("sse is ", sse)
+	#plot_cluster(data_mat, cluster_assment, centroid)
+	plot_fig(data_mat)
 	#plot_noncov()
 	#test_diff_k()
 

@@ -137,3 +137,37 @@ def clusterClubs(numClust=5):
         ax1.scatter(ptsInCurrCluster[:,0].flatten().A[0], ptsInCurrCluster[:,1].flatten().A[0], marker=markerStyle, s=90)
     ax1.scatter(myCentroids[:,0].flatten().A[0], myCentroids[:,1].flatten().A[0], marker='+', s=300)
     plt.show()
+
+def plot_cluster(data_mat, cluster_assment, centroid):
+    """
+    @brief      plot cluster and centroid
+    @param      data_mat        The data matrix
+    @param      cluster_assment  The cluste assment
+    @param      centroid        The centroid
+    @return     
+    """
+    from numpy import *
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(15, 6), dpi=80)
+    plt.subplot(121)
+    plt.plot(data_mat[:, 0], data_mat[:, 1], 'o')
+    plt.title("source data")
+    plt.subplot(122)
+    k = shape(centroid)[0]
+    colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
+    for i, col in zip(range(k), colors):
+        per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
+        plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),
+                 markeredgecolor='k', markersize=10)
+    for i in range(k):
+        plt.plot(centroid[:,0], centroid[:,1], '+', color = 'k', markersize=18)
+    plt.title("bi_KMeans Cluster, k = 3")
+    plt.show()
+
+
+if __name__ == '__main__': 
+    data_mat = mat(loadDataSet("testSet2.txt"))
+    centroid, cluster_assment = biKmeans(data_mat, 3)
+    sse = sum(cluster_assment[:,1])
+    print("sse is ", sse)
+    #plot_cluster(data_mat, cluster_assment, centroid)

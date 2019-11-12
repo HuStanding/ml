@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-11-08 09:15:57
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-10 14:49:28
+# @Last Modified time: 2019-11-12 09:59:40
 from numpy import *
 import numpy as np
 import matplotlib.pyplot as plt
@@ -129,24 +129,13 @@ class Optics(object):
 def plot_test():
     X = load_data()
     plt.figure(figsize=(15, 6), dpi=80)
-    # plt.subplot(111)
-    # plt.scatter(X[:, 0], X[:, 1], marker='.')
-    # plt.title("source data")
-    
-    # label = dbscan_lib(X, 1.5, 5)
-    # k = len(set(label))
-    # colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
-    # for i, col in zip(range(k), colors):
-    #     per_data_set = X[nonzero(label == i - 1)[0]]
-    #     plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    # plt.title("dbscan, eps = 1.5, min_pts = 5")
 
     plt.subplot(121)
     test = Optics(X)
     order_list, reach_dist = test.optics(eps = 10, min_pts = 5)
     x = [reach_dist[i] for i in order_list]
     plt.bar(range(len(order_list)),x)
-    plt.title("optics, core_distance of every order_list element")
+    plt.title("optics, core_distance of every order_list element", fontsize=15)
 
     plt.subplot(122)
     label = np.array(test.extract(2.2))
@@ -155,12 +144,28 @@ def plot_test():
     for i, col in zip(range(k), colors):
         per_data_set = X[nonzero(label == i - 1)[0]]
         plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
-    plt.title("optics, eps = 10, min_pts = 5, eps' = 2.2")
+    plt.title("optics, eps = 10, min_pts = 5, eps' = 2.2", fontsize=15)
+    plt.show()
 
-
+def plot_dbscan():
+    X = load_data()
+    plt.figure(figsize=(15, 6), dpi=80)
+    plt.subplot(121)
+    plt.plot(X[:, 0], X[:, 1], 'o',markersize=5)
+    plt.title("source data", fontsize=15)
+    
+    plt.subplot(122)
+    label = dbscan_lib(X, 1.5, 5)
+    k = len(set(label))
+    colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
+    for i, col in zip(range(k), colors):
+        per_data_set = X[nonzero(label == i - 1)[0]]
+        plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
+    plt.title("dbscan, eps = 1.5, min_pts = 5", fontsize=15)
     plt.show()
 
 if __name__ == '__main__':
     plot_test()
+    #plot_dbscan()
 
     

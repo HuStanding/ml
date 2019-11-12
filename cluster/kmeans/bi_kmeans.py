@@ -3,7 +3,7 @@
 # @Author: huzhu
 # @Date:   2019-10-29 09:31:43
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-10 20:11:42
+# @Last Modified time: 2019-11-11 21:22:57
 
 import codecs
 from numpy import *
@@ -76,7 +76,7 @@ def k_Means(data_mat, k, dist = "dist_eucl", create_cent = "rand_cent"):
 					min_index = j
 			if cluster_assment[i, 0] != min_index:
 				cluster_changed = True
-				cluster_assment[i, :] = min_index, min_dist**2
+			cluster_assment[i, :] = min_index, min_dist**2
 		# 计算簇中所有点的均值并重新将均值作为质心
 		for j in range(k):
 			per_data_set = data_mat[nonzero(cluster_assment[:,0].A == j)[0]]
@@ -142,7 +142,7 @@ def plot_cluster(data_mat, cluster_assment, centroid):
 	plt.figure(figsize=(15, 6), dpi=80)
 	plt.subplot(121)
 	plt.plot(data_mat[:, 0], data_mat[:, 1], 'o')
-	plt.title("source data")
+	plt.title("source data", fontsize=15)
 	plt.subplot(122)
 	k = shape(centroid)[0]
 	colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
@@ -152,7 +152,7 @@ def plot_cluster(data_mat, cluster_assment, centroid):
 	             markeredgecolor='k', markersize=10)
 	for i in range(k):
 		plt.plot(centroid[:,0], centroid[:,1], '+', color = 'k', markersize=18)
-	plt.title("bi_KMeans Cluster, k = 3")
+	plt.title("bi_KMeans Cluster, k = 3", fontsize=15)
 	plt.show()
 
 if __name__ == '__main__':
