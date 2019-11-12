@@ -1,4 +1,4 @@
-# k_means.py
+# kmeans++.py
 # -*- coding: utf-8 -*-
 # @Author: huzhu
 # @Date:   2019-10-29 09:31:43
