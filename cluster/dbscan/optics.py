@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-11-08 09:15:57
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-12 09:59:40
+# @Last Modified time: 2019-11-13 14:40:39
 from numpy import *
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,6 +13,7 @@ from scipy.spatial import KDTree
 from sklearn.datasets import make_moons
 import matplotlib.pyplot as plt
 from sklearn import datasets
+import matplotlib.animation as animation
 
 def dist(a, b):
     """
@@ -164,8 +165,37 @@ def plot_dbscan():
     plt.title("dbscan, eps = 1.5, min_pts = 5", fontsize=15)
     plt.show()
 
+def plot_fig():
+    """
+    @brief      绘制并保存gif图
+    @param      k         { parameter_description }
+    @return     { description_of_the_return_value }
+    """
+    data_mat = load_data()
+    order_list = list()
+    xdata, ydata = [], []
+    test = Optics(data_mat)
+    order_list, reach_dist = test.optics(eps = 10, min_pts = 5)
+    new_order_list = [order_list[i] for i in range(0, len(order_list), 10)]
+    # 绘制动图
+    fig, ax = plt.subplots()
+    plt.scatter(data_mat[:, 0], data_mat[:, 1], c = 'k')
+    plt.title("OPTICS Cluster Order List", fontsize=15)
+    def update(i):
+        tmp = order_list[order_list.index(i):order_list.index(i)+10]
+        for j in tmp:
+            xdata.append(data_mat[j, 0])
+            ydata.append(data_mat[j, 1])
+        line, = plt.plot(xdata, ydata, 'o', c='r', markersize=5)
+        return line,
+
+    anim = animation.FuncAnimation(fig, update, frames=new_order_list,interval=1, repeat=False)
+    #plt.show() 
+    anim.save('../pic/optics_process.gif',writer='pillow')
+
 if __name__ == '__main__':
-    plot_test()
+    #plot_test()
+    plot_fig()
     #plot_dbscan()
 
     

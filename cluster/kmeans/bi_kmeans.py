@@ -161,6 +161,7 @@ if __name__ == '__main__':
 	centroid, cluster_assment = bi_kMeans(data_mat, 3)
 	sse = sum(cluster_assment[:,1])
 	print("sse is ", sse)
+	print(centroid)
 	plot_cluster(data_mat, cluster_assment, centroid)
 	# plot_noncov()
 	# test_diff_k()

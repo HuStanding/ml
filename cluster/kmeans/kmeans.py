@@ -3,7 +3,7 @@
 # @Author: huzhu
 # @Date:   2019-10-29 09:31:43
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-12 20:10:19
+# @Last Modified time: 2019-11-13 11:18:56
 
 import codecs
 from numpy import *
@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.datasets import make_moons
 import matplotlib.animation as animation
+from sklearn.cluster import KMeans
 
 def load_data(path):
 	"""
@@ -182,14 +183,6 @@ def plot_fig(data_mat):
 	centroid_list = list()
 	cluster_assment_list = list()
 	def sub_kMeans(data_mat, k, dist = "dist_eucl", create_cent = "rand_cent"):
-		"""
-		@brief      kMeans algorithm
-		@param      data_mat     The data matrix
-		@param      k            num of cluster
-		@param      dist         The distance funtion
-		@param      create_cent  The create centroid function
-		@return     the cluster
-		"""
 		m = shape(data_mat)[0]
 		# 初始化点的簇
 		cluster_assment = mat(zeros((m, 2)))  # 类别，距离
@@ -242,16 +235,29 @@ def plot_fig(data_mat):
 	plt.show() 
 	anim.save('test_animation.gif',writer='pillow')
 
+def kmeans_lib():
+	data_mat = mat(load_data("data/testSet2_kmeans.txt"))
+	estimator = KMeans(n_clusters=3)#构造聚类器
+	estimator.fit(data_mat)#聚类
+	label_pred = estimator.labels_ #获取聚类标签
+	print(label_pred)
+	centroids = estimator.cluster_centers_ #获取聚类中心
+	inertia = estimator.inertia_ # 获取聚类准则的总和
+	plot_cluster(data_mat, mat(label_pred), centroids)
+	print(centroids)
+	print(inertia)
+
 if __name__ == '__main__':
-	data_mat = mat(load_data("data/testSet_kmeans.txt"))
+	#data_mat = mat(load_data("data/testSet_kmeans.txt"))
 	#data_mat = mat(load_data("data/testSet2_kmeans.txt"))
 	#data_mat,c = make_moons(n_samples=1000,noise=0.1)  
-	centroid, cluster_assment = kMeans(data_mat, 4)
-	sse = sum(cluster_assment[:,1])
-	print("sse is ", sse)
+	#centroid, cluster_assment = kMeans(data_mat, 3)
+	#sse = sum(cluster_assment[:,1])
+	#print("sse is ", sse)
 	#plot_cluster(data_mat, cluster_assment, centroid)
-	plot_fig(data_mat)
+	#plot_fig(data_mat)
 	#plot_noncov()
 	#test_diff_k()
+	#kmeans_lib()
 
 	

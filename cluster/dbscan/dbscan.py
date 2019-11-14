@@ -2,7 +2,7 @@
 # @Author: huzhu
 # @Date:   2019-10-14 20:51:30
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-11 21:10:47
+# @Last Modified time: 2019-11-13 11:37:26
 
 from numpy import *
 import numpy as np
@@ -14,6 +14,8 @@ from scipy.spatial import KDTree
 from sklearn.datasets import make_moons
 import matplotlib.pyplot as plt
 from sklearn import datasets
+import matplotlib.animation as animation
+import copy
 
 class visitlist:
     """
@@ -110,7 +112,7 @@ def dbscan(dataSet, eps, minPts):
                     if C[p1] == -1:
                         C[p1] = k
         else:
-            C[p1] = -1
+            C[p] = -1
     return C
 
 def dbscan_lib(dataSet, eps, minPts):
@@ -126,30 +128,28 @@ def dbscan_lib(dataSet, eps, minPts):
     return C
 
 def plot_test():
-    X1, Y1 = datasets.make_circles(n_samples=2000, factor=0.6, noise=0.05,
-                                   random_state=1)
-    X2, Y2 = datasets.make_blobs(n_samples=500, n_features=2, centers=[[1.5,1.5]],
-                                 cluster_std=[[0.1]], random_state=5)
+    # X1, Y1 = datasets.make_circles(n_samples=2000, factor=0.6, noise=0.05,
+    #                                random_state=1)
+    # X2, Y2 = datasets.make_blobs(n_samples=500, n_features=2, centers=[[1.5,1.5]],
+    #                              cluster_std=[[0.1]], random_state=5)
 
-    X = np.concatenate((X1, X2))
+    # X = np.concatenate((X1, X2))
+    X,c = make_moons(n_samples=1000,noise=0.1) 
     plt.figure(figsize=(15, 6), dpi=80)
     plt.subplot(121)
     plt.scatter(X[:,0], X[:,1], marker='.')
-    plt.title("source data")
+    plt.title("source data", fontsize=15)
 
 
     # 获取集合簇
     plt.subplot(122)
-    start = time.time()
-    #C = dbscan_simple(X, 0.1, 10)  #31.79s
-    C = dbscan(X, 0.1, 10)    # 4.17s
-    #C = dbscan_lib(X, 0.1, 3)   # 0.19s
-    end = time.time()
-    print(end-start)
-    colors = ["r", "g", "b", 'c', 'm', 'y', 'k', 'w']
-    for i in range(X.shape[0]):
-        plt.scatter(X[i][0], X[i][1], c = colors[C[i] + 1 % len(colors)])
-    plt.title("DBSCAN Cluster, eps = 0.1, min_pts = 3")
+    C = dbscan_lib(X, 0.1, 5)
+    k = len(set(C))
+    colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
+    for i, col in zip(range(k), colors):
+        per_data_set = X[nonzero(C == i - 1)[0]]
+        plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markersize=5)
+    plt.title("eps = 0.1, min_pts = 5, cluster = {}".format(str(k)), fontsize=15)
     plt.show()
 
 def plot_diff_eps():
@@ -242,8 +242,72 @@ def plot_diff_minpts():
     plt.title("eps = 0.1, min_pts = 20, cluster = {}".format(str(k)), fontsize=15)
     plt.show()
 
+def plot_fig():
+    """
+    @brief      绘制并保存gif图
+    @param      k         { parameter_description }
+    @return     { description_of_the_return_value }
+    """
+    data_mat,c = make_moons(n_samples=1000,noise=0.1) 
+    C_list = list()
+    def sub_dbscan(dataSet, eps, minPts):
+        nPoints = dataSet.shape[0]
+        vPoints = visitlist(count=nPoints)
+        # 初始化簇标记列表C，簇标记为 k
+        k = -1
+        C = [-1 for i in range(nPoints)]
+        # 构建KD-Tree，并生成所有距离<=eps的点集合
+        kd = KDTree(dataSet)
+        while(vPoints.unvisitednum>0):
+            p = random.choice(vPoints.unvisitedlist)
+            vPoints.visit(p)
+            N = kd.query_ball_point(dataSet[p], eps)
+            if len(N) >= minPts:
+                k += 1
+                C[p] = k
+                for p1 in N:
+                    if p1 in vPoints.unvisitedlist:
+                        vPoints.visit(p1)
+                        M = kd.query_ball_point(dataSet[p1], eps)
+                        new_C = C.copy()
+                        C_list.append(new_C)
+                        if len(M) >= minPts:
+                            for i in M:
+                                if i not in N:
+                                    N.append(i)
+                        if C[p1] == -1:
+                            C[p1] = k
+                            
+            else:
+                C[p] = -1
+        return C_list
+    C_list = sub_dbscan(data_mat,0.1,3)
+    C_list = [C_list[i] for i in range(0, len(C_list), 20)]
+    # 绘制动图
+    fig, ax = plt.subplots()
+    plt.scatter(data_mat[:, 0], data_mat[:, 1], c = 'k')
+    plt.title("DBSCAN Cluster Process", fontsize=15)
+    def update(i):
+        try:
+            ax.lines.pop()
+        except Exception:
+            pass
+        C = array(C_list[i])
+        k = len(set(C))
+        colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
+        for i, col in zip(range(k), colors):
+            per_data_set = data_mat[nonzero(C == i)[0]]
+            line, =plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markeredgecolor='k', markersize=10)
+        return line,
+
+    anim = animation.FuncAnimation(fig, update, frames=len(C_list),interval=100, repeat=False)
+    #plt.show() 
+    anim.save('../pic/dbscan_process.gif',writer='pillow')
+
 if __name__ == '__main__':
-    plot_diff_minpts()
+    #plot_diff_minpts()
     #plot_diff_eps()
-    #plot_test()
+    plot_test()
+    #plot_fig()
+    
     
