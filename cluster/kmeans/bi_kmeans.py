@@ -3,7 +3,7 @@
 # @Author: huzhu
 # @Date:   2019-10-29 09:31:43
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-11 21:22:57
+# @Last Modified time: 2019-11-14 22:08:17
 
 import codecs
 from numpy import *
@@ -33,11 +33,14 @@ def rand_cent(data_mat, k):
 	"""
 	n = shape(data_mat)[1]
 	centroids = mat(zeros((k, n)))
+	if not data_mat.any():
+		return centroids
 	for j in range(n):
 		minJ = min(data_mat[:,j]) 
 		rangeJ = float(max(data_mat[:,j]) - minJ)
 		centroids[:,j] = mat(minJ + rangeJ * random.rand(k,1))
 	return centroids
+
 
 def dist_eucl(vecA, vecB):
 	"""
@@ -157,13 +160,20 @@ def plot_cluster(data_mat, cluster_assment, centroid):
 
 if __name__ == '__main__':
 	# data_mat = mat(load_data("data/testSet_kmeans.txt"))
-	data_mat = mat(load_data("data/testSet2_kmeans.txt"))
-	centroid, cluster_assment = bi_kMeans(data_mat, 3)
-	sse = sum(cluster_assment[:,1])
-	print("sse is ", sse)
-	print(centroid)
-	plot_cluster(data_mat, cluster_assment, centroid)
+	lst = list()
+	for i in range(1000):
+		data_mat = mat(load_data("data/testSet2_kmeans.txt"))
+		centroid, cluster_assment = bi_kMeans(data_mat, 3)
+		sse = sum(cluster_assment[:,1])
+		lst.append(sse)
+		#print("sse is ", sse)
+		print(centroid)
+		#plot_cluster(data_mat, cluster_assment, centroid)
 	# plot_noncov()
 	# test_diff_k()
-
+	j = 0
+	for i in (lst):
+		if abs(i - 106.74949876187601) < 1e-5:
+			j += 1
+	print(1.0 * j / len(lst))
 	

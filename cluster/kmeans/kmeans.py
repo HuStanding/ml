@@ -3,7 +3,7 @@
 # @Author: huzhu
 # @Date:   2019-10-29 09:31:43
 # @Last Modified by:   huzhu
-# @Last Modified time: 2019-11-13 11:18:56
+# @Last Modified time: 2019-11-14 21:14:20
 
 import codecs
 from numpy import *
@@ -227,7 +227,7 @@ def plot_fig(data_mat):
 		colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
 		for i, col in zip(range(k), colors):
 			per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
-			line, =plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markeredgecolor='k', markersize=10)
+			line, = plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),markeredgecolor='k', markersize=10)
 		line, = plt.plot(centroid[:,0], centroid[:,1], '*', color = 'k', markersize=18)
 		return line,
 
@@ -249,12 +249,12 @@ def kmeans_lib():
 
 if __name__ == '__main__':
 	#data_mat = mat(load_data("data/testSet_kmeans.txt"))
-	#data_mat = mat(load_data("data/testSet2_kmeans.txt"))
+	data_mat = mat(load_data("data/testSet2_kmeans.txt"))
 	#data_mat,c = make_moons(n_samples=1000,noise=0.1)  
-	#centroid, cluster_assment = kMeans(data_mat, 3)
-	#sse = sum(cluster_assment[:,1])
-	#print("sse is ", sse)
-	#plot_cluster(data_mat, cluster_assment, centroid)
+	centroid, cluster_assment = kMeans(data_mat, 3)
+	sse = sum(cluster_assment[:,1])
+	print("sse is ", sse)
+	plot_cluster(data_mat, cluster_assment, centroid)
 	#plot_fig(data_mat)
 	#plot_noncov()
 	#test_diff_k()
