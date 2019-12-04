@@ -127,6 +127,7 @@ def test01():
     plt.plot(xcopy[:, 1], y_hat)
     y_hat = lwrl_test(x_arr, x_arr, y_arr, k=0.01)
     srt_ind=x_mat[:, 1].argsort(0)
+    print(y_hat[srt_ind])
     plt.plot(xcopy[:,1],y_hat[srt_ind], c = "red")
     plt.show()
 
@@ -142,5 +143,6 @@ def test03():
 
 if __name__ == '__main__':
     #test01()
-    #test02()
+    test02()
     test03()
+#
