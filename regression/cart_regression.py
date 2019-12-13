@@ -61,5 +61,5 @@ if __name__ == "__main__":
     from sklearn import tree
     get_params(x_data,y_data)
     model_decisiontree_regression = tree.DecisionTreeRegressor(min_impurity_decrease=0.01)
-    #plot_decision(model_decisiontree_regression, x_data, y_data)
+    plot_decision(model_decisiontree_regression, x_data, y_data)
     
