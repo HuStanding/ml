@@ -133,7 +133,8 @@ def softmax_lib():
 
 if __name__ == "__main__":
     #gen_dataset()
-    softmax_lib()
+    #softmax_lib()
+    myfun()
 
 
 

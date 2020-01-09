@@ -100,7 +100,7 @@ def plot_cluster(data_mat, cluster_assment, centroid):
 	plt.title("source data", fontsize=15)
 	plt.subplot(122)
 	k = shape(centroid)[0]
-	colors = [plt.cm.Spectral(each) for each in linspace(0, 1, k)]
+	colors = [plt.cm.get_cmap("Spectral")(each) for each in linspace(0, 1, k)]
 	for i, col in zip(range(k), colors):
 	    per_data_set = data_mat[nonzero(cluster_assment[:,0].A == i)[0]]
 	    plt.plot(per_data_set[:, 0], per_data_set[:, 1], 'o', markerfacecolor=tuple(col),
