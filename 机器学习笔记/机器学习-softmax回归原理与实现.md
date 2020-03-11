@@ -1,3 +1,5 @@
+[toc]
+
 # 一、什么是 softmax 回归？
 
 **softmax 回归**(softmax regression)其实是 logistic 回归的一般形式，logistic 回归用于二分类，而 softmax 回归用于多分类，关于  logistic 回归可以看我的这篇博客👉[[机器学习-logistic回归原理与实现]](https://zhuanlan.zhihu.com/p/95132284)。
