@@ -4,25 +4,37 @@
 
 # 一、什么是logistic回归？
 
-logistic回归又叫对数几率回归，适合数值型的二值型输出的拟合，它其实是一个分类模型，比如根据患者的医疗数据判断它是否能被治愈。
+logistic 回归又叫**对数几率回归**，适合数值型的二值型输出的拟合，它其实是一个分类模型，比如根据患者的医疗数据判断它是否能被治愈。
 
 # 二、logistic回归数学原理与算法实现
 
 我们考虑1个输入的$n$维数据$x=(x_1,x_2,\ldots,x_n)$，我们对输入数据进行线性加权得到
 $$
-g(x)=w_{0}+w_{1} x_{1}+\ldots+w_{n} x_{n}=w^{T}x
+g(x)=w_{0}+w_{1} x_{1}+\ldots+w_{n} x_{n}=w^{T}x \tag{1}
 $$
 前面说到，logistic回归用于而分类，假设得到的类别为0或者1，那么可以使用sigmoid函数处理输入，这个函数类似于阶跃函数但是又是连续型函数，看下这个函数长什么样
 
-![sigmoid](https://tva1.sinaimg.cn/large/006tNbRwly1g9i7umryu5j318g0m8mxs.jpg)
+![sigmoid](https://tva1.sinaimg.cn/large/00831rSTly1gd8wzlk8aej318g0m8t9k.jpg)
 
-将其作为sigmoid函数的输入，得到
+$ \text{sigmod}(x)$ 其实衡量的是输入数据 $x$ 归属于类别 1 的概率，当 $x <0$ 的时候，$\text{sigmod}(x) < 0.5$ ，可以认为 $x$ 归属于类别 0 的概率较大，当  $x >0$ 的时候，$\text{sigmod}(x) > 0.5$，可以认为 $x$ 归属于类别 1 的概率较大。如果我们将线性加权得到的 $g(x)$ 作为 sigmoid 函数的输入，得到
 $$
-f(x)=\frac{1}{1+e^{-g(x)}}
+f(x)=\frac{1}{1+e^{-g(x)}}=\sigma(g(x))=\sigma(w^Tx)\tag{2}
 $$
-我们将$g(x)$作为输入数据$x$的输出，最上式做个简单的变换
+这样就得到了输入数据 $x$ 最终属于类别 1 的概率。
+
+我们先考虑使用常规的均方差作为损失函数，这时候的损失函数为
 $$
-\ln\frac{f(x)}{1-f(x)}=w^Tx
+L(x)=\frac{1}{2}(y-f(x))^2=\frac{1}{2}\left(y-\sigma(w^Tx)\right)^2\tag{3}
+$$
+采用梯度下降的方法对 $w$ 进行更新，那么需要将损失函数对 $w$ 求导得到
+$$
+\frac{\partial L}{\partial w}=\left(y-\sigma(w^Tx)\right)\sigma'(w^Tx)x\tag{4}
+$$
+看到了吗？这里的梯度更新中包含了 $\sigma'(w^Tx)$ ，而通过 sigmod 函数可以发现，当 $\sigma(w^Tx)$ 位于 0 或者 1附近的时候，导数值基本趋近于 0，梯度收敛速度极慢。
+
+所以在这种情况下我们可以考虑使用**交叉熵**作为损失函数。将$g(x)$作为输入数据$x$的输出，最上式做个简单的变换
+$$
+\ln\frac{f(x)}{1-f(x)}=w^Tx\tag{5}
 $$
 将$f(x)$视为类后验概率估计$P(y=1|x)$，则上式可以重写为
 $$
@@ -31,20 +43,22 @@ $$
 那么从而可以得到
 $$
 P(y=1 | x)=f(x)\\
-P(y=0 | x)=1-f(x)
+P(y=0 | x)=1-f(x) \tag{6}
 $$
-所以得到一个观测值的概率为
+上式可以合并为
 $$
-P(y | x,w)=[f(x)]^y \cdot [1-f(x)]^{1-y}
+P(y | x,w)=[f(x)]^y \cdot [1-f(x)]^{1-y}\tag{7}
 $$
 设输入数据为$X=\left[\begin{array}& {x_{11}} & {x_{12}} & {\dots} & {x_{1 n}} \\ {x_{21}} & {x_{22}} & {\dots} & {x_{2 n}} \\ {\vdots} & {\vdots} & {\vdots} & {\dots} & {\vdots} \\  {x_{m 1}} & {x_{m 2}} & {\dots} & {x_{m n}}\end{array}\right]=\{x_1,x_2,\ldots,x_m\}$，$y=\left[\begin{array}{c}{y_{1}} \\ {y_{2}} \\ {\vdots} \\ {y_{m}}\end{array}\right]$，$x_i$表示第$i$个输入数据，上式的似然函数为
 $$
-L(w)=\prod_{i=1}^{m}\left[f\left(x_{i}\right)\right]^{y_{i}}\left[1-f\left(x_{i}\right)\right]^{1-y_{i}}
+L(w)=\prod_{i=1}^{m}\left[f\left(x_{i}\right)\right]^{y_{i}}\left[1-f\left(x_{i}\right)\right]^{1-y_{i}}\tag{8}
 $$
 然后我们的目标是求出使这一似然函数的值最大的参数估计，最大似然估计就是求出参数$w_0,w_1,\ldots,w_n$，使得上式取得最大值，对上式求导得到
 $$
-\ln L(w)=\sum_{i=1}^{m}\left(y_{i} \ln \left[f\left(x_{i}\right)\right]+\left(1-y_{i}\right) \ln \left[1-f\left(x_{i}\right)\right]\right)
+\ln L(w)=\sum_{i=1}^{m}\left(y_{i} \ln \left[f\left(x_{i}\right)\right]+\left(1-y_{i}\right) \ln \left[1-f\left(x_{i}\right)\right]\right)\tag{9}
 $$
+
+> 这里补充说明一下均方差和交叉熵损失的区别：均方差注重每个分类的结果，而交叉熵只注重分类正确的结果，所以交叉熵适合于分类问题，而不适合于回归问题，但是 logistic回归其实本质是 0-1 分类问题，所以这里依然适合作为 logistic 回归的损失函数。
 
 ## 2.1 梯度上升法估计参数
 
@@ -58,27 +72,27 @@ $$
 & {=\left(f\left(x_{i}\right)-y_{i}\right) g^{\prime}(x)} \\ 
 & {=x_{i k}\left[f\left(x_{i}\right)-y_{i}\right]}
 \end{split}
-\end{equation}
+\end{equation}\tag{10}
 $$
 那么
 $$
-\frac{\partial \ln L\left(w_{k}\right)}{\partial w_{k}}=\sum_{i=1}^{m} x_{ik}\left[f\left(x_{i}\right)-y_{i}\right]=0
+\frac{\partial \ln L\left(w_{k}\right)}{\partial w_{k}}=\sum_{i=1}^{m} x_{ik}\left[f\left(x_{i}\right)-y_{i}\right]=0\tag{11}
 $$
 我们使用**梯度上升法(Gradient ascent method)**求解参数$w$，其迭代公式为
 $$
-w=w+\alpha \nabla\ln L(w)
+w=w+\alpha \nabla\ln L(w)\tag{11}
 $$
 梯度已经在上面计算过了，即
 $$
-\nabla\ln L(w)=\frac{\partial \ln L\left(w\right)}{\partial w}
+\nabla\ln L(w)=\frac{\partial \ln L\left(w\right)}{\partial w}\tag{12}
 $$
-定义损失误差为
+定义
 $$
-E=f(x)-y
+E=f(x)-y\tag{13}
 $$
 所以我们现在可以得到
 $$
-w=w+\alpha \sum_{i=1}^{m} x_{ik}\left[f\left(x_{i}\right)-y_{i}\right]=w+ \alpha X^TE
+w=w+\alpha \sum_{i=1}^{m} x_{ik}\left[f\left(x_{i}\right)-y_{i}\right]=w+ \alpha X^TE\tag{14}
 $$
 
 代码实现
@@ -262,3 +276,5 @@ def logistic_lib(dataMatrix, classLabels):
 [1] [CSDN博客-logistic回归原理解析--一步步理解](https://blog.csdn.net/lgb_love/article/details/80592147)
 [2] [CSDN博客-logistic回归原理及公式推导](https://blog.csdn.net/AriesSurfer/article/details/41310525)
 [3] 李航. 统计学习方法, 清华大学出版社
+
+[4] [CSDN博客-logistic回归损失函数](https://blog.csdn.net/m0_37864814/article/details/94625639)

@@ -124,7 +124,7 @@ def plotBestFit(weights):
 
 
 def plot_sigmoid():
-    x = arange(-60.0, 60.0, 1)
+    x = arange(-10.0, 10.0, 1)
     y = sigmoid(x)
     fig = plt.figure(figsize=(8, 4))
     plt.xlabel('x')
@@ -141,4 +141,4 @@ if __name__ == "__main__":
     #logistic_lib(data_mat, label_mat)
     #plot_weights(weights_list)
     #plotBestFit(weights)
-    # plot_sigmoid()
+    plot_sigmoid()

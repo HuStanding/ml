@@ -3,3 +3,5 @@
 *.class
 .DS_Store
 */__pycache__
+fasttext/data
+fasttext/result
