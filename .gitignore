@@ -1,7 +1,8 @@
 *.pyc
-*/*.pyc
+
 *.class
 .DS_Store
 */__pycache__
 fasttext/data
 fasttext/result
+word2vec/data
